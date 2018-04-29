@@ -1,5 +1,6 @@
 from typing import Dict
 from urllib import request
+from urllib.error import HTTPError
 
 from bs4 import BeautifulSoup
 
@@ -17,15 +18,12 @@ def main():
 
 def get_latest_article_id() -> int:
     """만료된 청원 목록 페이지를 분석하여 가장 최근에 만료된 글번호를 가져오기"""
-    with request.urlopen('https://www1.president.go.kr/petitions?only=finished') as f:
-        if f.getcode() != 200:
-            raise ValueError(f'Invalid status code: {f.getcode()}')
-        html = f.read().decode('utf-8')
-        soup = BeautifulSoup(html, "html5lib")
-        elements = soup.select('.bl_body .bl_wrap .bl_no', limit=1)
-        if len(elements) == 0:
-            raise ValueError(f'Unable to find the latest article\'s id')
-        return int(elements[0].text)
+    html = fetch_html('https://www1.president.go.kr/petitions?only=finished')
+    soup = BeautifulSoup(html, "html5lib")
+    elements = soup.select('.bl_body .bl_wrap .bl_no', limit=1)
+    if len(elements) == 0:
+        raise ValueError(f'Unable to find the latest article\'s id')
+    return int(elements[0].text)
 
 
 def get_latest_saved_article_id() -> int:
@@ -46,6 +44,20 @@ def parse_article(html: str) -> Dict[str, any]:
 def save_article(article: Dict[str, any]) -> None:
     """글을 CSV 형태로 저장한다"""
     pass
+
+
+def fetch_html(url: str) -> str:
+    try:
+        with request.urlopen(url) as f:
+            if f.getcode() != 200:
+                raise ValueError(f'Invalid status code: {f.getcode()}')
+            html = f.read().decode('utf-8')
+            return html
+    except HTTPError as e:
+        if e.code == 404:
+            raise ValueError(f'Not found: {url}')
+        else:
+            raise e
 
 
 if __name__ == '__main__':
