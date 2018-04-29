@@ -5,6 +5,7 @@ from urllib import request
 from urllib.error import HTTPError
 
 from bs4 import BeautifulSoup
+import logging
 
 
 CSV_FILE = 'petition.csv'
@@ -14,10 +15,15 @@ def main():
     latest_id = get_latest_article_id()
     next_id = get_latest_saved_article_id() + 1
 
+    logging.info(
+        f'From {next_id} to {latest_id}: '
+        f'about {latest_id - next_id} articles to go...'
+    )
     for i in range(next_id, latest_id):
         try:
             article = fetch_article(i)
             save_article(article)
+            print(f'- {i} / {latest_id}: {article["title"]}')
         except ValueError:
             pass
 
@@ -95,7 +101,7 @@ def fetch_html(url: str) -> str:
             raise e
 
 
-def query(soup, selector):
+def query(soup: BeautifulSoup, selector: str) -> str:
     return soup.select_one(selector).text
 
 
