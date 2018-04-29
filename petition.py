@@ -9,11 +9,12 @@ def main():
     latest_id = get_latest_article_id()
     next_id = get_latest_saved_article_id() + 1
     for i in range(next_id, latest_id):
-        html = fetch_article(i)
-        if html is None:
-            continue
-        parsed_article = parse_article(html)
-        save_article(parsed_article)
+        try:
+            html = fetch_article(i)
+            parsed_article = parse_article(html)
+            save_article(parsed_article)
+        except ValueError:
+            pass
 
 
 def get_latest_article_id() -> int:
@@ -33,7 +34,8 @@ def get_latest_saved_article_id() -> int:
 
 def fetch_article(article_id: int) -> str:
     """글번호에 해당하는 글의 HTML 텍스트를 가져오기. 해당 글이 없으면 ValueError"""
-    raise ValueError(f'Not found: {article_id}')
+    html = fetch_html(f'https://www1.president.go.kr/petitions/{article_id}')
+    return html
 
 
 def parse_article(html: str) -> Dict[str, any]:
