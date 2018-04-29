@@ -1,8 +1,12 @@
+import csv
+import os
 from typing import Dict
 from urllib import request
 from urllib.error import HTTPError
 
 from bs4 import BeautifulSoup
+
+CSV_FILE = 'petition.csv'
 
 
 def main():
@@ -50,8 +54,18 @@ def fetch_article(article_id: int) -> Dict[str, any]:
 
 def save_article(article: Dict[str, any]) -> None:
     """글을 CSV 형태로 저장한다"""
-    print(f'Saving...{article["article_id"]}')
-    pass
+    cols = ['article_id', 'start', 'end', 'votes', 'category', 'title', 'content']
+
+    # 파일이 없으면 새로 만들고 칼럼 이름 저장
+    if not os.path.isfile(CSV_FILE):
+        with open(CSV_FILE, 'w', newline='') as f:
+            w = csv.writer(f)
+            w.writerow(cols)
+
+    # 새로운 행 추가
+    with open(CSV_FILE, 'a', newline='') as f:
+        w = csv.writer(f)
+        w.writerow(article[col] for col in cols)
 
 
 def fetch_html(url: str) -> str:
