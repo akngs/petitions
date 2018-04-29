@@ -13,6 +13,7 @@ CSV_FILE = 'petition.csv'
 def main():
     latest_id = get_latest_article_id()
     next_id = get_latest_saved_article_id() + 1
+
     for i in range(next_id, latest_id):
         try:
             article = fetch_article(i)
@@ -30,7 +31,21 @@ def get_latest_article_id() -> int:
 
 def get_latest_saved_article_id() -> int:
     """이미 저장한 가장 최근 글번호를 가져오기. 저장된 글이 없으면 0을 반환"""
-    return 0
+    # 글이 없으면 0
+    if not os.path.isfile(CSV_FILE):
+        return 0
+
+    # 파일 끝 부분에서 몇 줄 읽어온 뒤 마지막 줄의 첫 칼럼(article_id) 반환
+    with open(CSV_FILE, 'rb') as f:
+        # 마지막 줄을 빠르게 찾기 위해 "거의" 끝 부분으로 이동
+        f.seek(0, os.SEEK_END)
+        f.seek(-min([f.tell(), 1024 * 100]), os.SEEK_CUR)
+
+        # 마지막 줄에서 article id 추출
+        last_line = f.readlines()[-1].decode('utf-8')
+        article_id = int(last_line.split(',')[0])
+
+        return article_id
 
 
 def fetch_article(article_id: int) -> Dict[str, any]:
