@@ -6,6 +6,7 @@ from urllib.error import HTTPError
 
 from bs4 import BeautifulSoup
 
+
 CSV_FILE = 'petition.csv'
 
 
@@ -24,10 +25,7 @@ def get_latest_article_id() -> int:
     """만료된 청원 목록 페이지를 분석하여 가장 최근에 만료된 글번호를 가져오기"""
     html = fetch_html('https://www1.president.go.kr/petitions?only=finished')
     soup = BeautifulSoup(html, "html5lib")
-    elements = soup.select('.bl_body .bl_wrap .bl_no', limit=1)
-    if len(elements) == 0:
-        raise ValueError(f'Unable to find the latest article\'s id')
-    return int(elements[0].text)
+    return int(query(soup, '.bl_body .bl_wrap .bl_no'))
 
 
 def get_latest_saved_article_id() -> int:
@@ -43,12 +41,12 @@ def fetch_article(article_id: int) -> Dict[str, any]:
 
     return {
         'article_id': article_id,
-        'title': soup.select('.petitionsView_title', limit=1)[0].text,
-        'votes': int(soup.select('.petitionsView_count .counter', limit=1)[0].text),
-        'category': soup.select('.petitionsView_info_list li:nth-of-type(1)', limit=1)[0].text[4:],
-        'start': soup.select('.petitionsView_info_list li:nth-of-type(2)', limit=1)[0].text[4:],
-        'end': soup.select('.petitionsView_info_list li:nth-of-type(3)', limit=1)[0].text[4:],
-        'content': soup.select('.View_write')[0].text,
+        'title': query(soup, '.petitionsView_title'),
+        'votes': int(query(soup, '.petitionsView_count .counter')),
+        'category': query(soup, '.petitionsView_info_list li:nth-of-type(1)')[4:],
+        'start': query(soup, '.petitionsView_info_list li:nth-of-type(2)')[4:],
+        'end': query(soup, '.petitionsView_info_list li:nth-of-type(3)')[4:],
+        'content': query(soup, '.View_write').replace('\n', '\\n').replace('\t', '\\t'),
     }
 
 
@@ -80,6 +78,10 @@ def fetch_html(url: str) -> str:
             raise ValueError(f'Not found: {url}')
         else:
             raise e
+
+
+def query(soup, selector):
+    return soup.select_one(selector).text
 
 
 if __name__ == '__main__':
