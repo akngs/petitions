@@ -22,7 +22,7 @@ def main():
         try:
             article = fetch_article(i)
             save_article(article)
-            print(f'- {i} / {latest_id}: {article["title"]}')
+            logging.info(f'- {i} / {latest_id}: {article["title"]}')
         except ValueError:
             pass
 
@@ -54,25 +54,36 @@ def get_latest_saved_article_id() -> int:
 
 
 def fetch_article(article_id: int) -> Dict[str, any]:
-    """글번호에 해당하는 글의 HTML 텍스트를 가져와서 파싱. 해당 글이 없거나 형식이 다르면 ValueError"""
+    """글번호에 해당하는 글의 HTML 텍스트를 가져와서 파싱. 해당 글이 없으면 ValueError"""
     url = f'https://www1.president.go.kr/petitions/{article_id}'
     html = fetch_html(url)
     soup = BeautifulSoup(html, "html5lib")
 
+    title = query(soup, '.petitionsView_title')
+    votes = int(query(soup, '.petitionsView_count .counter'))
+    category = query(soup, '.petitionsView_info_list li:nth-of-type(1)')[4:]
+    start = query(soup, '.petitionsView_info_list li:nth-of-type(2)')[4:]
+    end = query(soup, '.petitionsView_info_list li:nth-of-type(3)')[4:]
+    content = remove_whitespaces(query(soup, '.View_write')) \
+        .replace('\n', '\\n') \
+        .replace('\t', '\\t')
+
     return {
         'article_id': article_id,
-        'title': query(soup, '.petitionsView_title'),
-        'votes': int(query(soup, '.petitionsView_count .counter')),
-        'category': query(soup, '.petitionsView_info_list li:nth-of-type(1)')[4:],
-        'start': query(soup, '.petitionsView_info_list li:nth-of-type(2)')[4:],
-        'end': query(soup, '.petitionsView_info_list li:nth-of-type(3)')[4:],
-        'content': remove_whitespaces(query(soup, '.View_write')).replace('\n', '\\n').replace('\t', '\\t'),
+        'title': title,
+        'votes': votes,
+        'category': category,
+        'start': start,
+        'end': end,
+        'content': content,
     }
 
 
 def save_article(article: Dict[str, any]) -> None:
     """글을 CSV 형태로 저장한다"""
-    cols = ['article_id', 'start', 'end', 'votes', 'category', 'title', 'content']
+    cols = [
+        'article_id', 'start', 'end', 'votes', 'category', 'title', 'content'
+    ]
 
     # 파일이 없으면 새로 만들고 칼럼 이름 저장
     if not os.path.isfile(CSV_FILE):
@@ -87,6 +98,7 @@ def save_article(article: Dict[str, any]) -> None:
 
 
 def fetch_html(url: str) -> str:
+    """웹에서 HTML 문서를 읽어서 반환"""
     try:
         with request.urlopen(url) as f:
             if f.getcode() != 200:
@@ -101,6 +113,7 @@ def fetch_html(url: str) -> str:
 
 
 def query(soup: BeautifulSoup, selector: str) -> str:
+    """CSS selector로 요소를 찾은 뒤 텍스트 컨텐츠를 반환"""
     return soup.select_one(selector).text
 
 
