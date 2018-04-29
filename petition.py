@@ -7,7 +7,6 @@ from urllib.error import HTTPError
 from bs4 import BeautifulSoup
 import logging
 
-
 CSV_FILE = 'petition.csv'
 
 
@@ -67,7 +66,7 @@ def fetch_article(article_id: int) -> Dict[str, any]:
         'category': query(soup, '.petitionsView_info_list li:nth-of-type(1)')[4:],
         'start': query(soup, '.petitionsView_info_list li:nth-of-type(2)')[4:],
         'end': query(soup, '.petitionsView_info_list li:nth-of-type(3)')[4:],
-        'content': query(soup, '.View_write').replace('\n', '\\n').replace('\t', '\\t'),
+        'content': remove_whitespaces(query(soup, '.View_write')).replace('\n', '\\n').replace('\t', '\\t'),
     }
 
 
@@ -103,6 +102,14 @@ def fetch_html(url: str) -> str:
 
 def query(soup: BeautifulSoup, selector: str) -> str:
     return soup.select_one(selector).text
+
+
+def remove_whitespaces(text: str) -> str:
+    """본문 텍스트에서 불필요한 공백 문자들 제거"""
+    lines = text.split('\n')
+    lines = (l.strip() for l in lines)
+    lines = (l for l in lines if len(l) > 0)
+    return '\n'.join(lines)
 
 
 if __name__ == '__main__':
