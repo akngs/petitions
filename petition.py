@@ -10,9 +10,8 @@ def main():
     next_id = get_latest_saved_article_id() + 1
     for i in range(next_id, latest_id):
         try:
-            html = fetch_article(i)
-            parsed_article = parse_article(html)
-            save_article(parsed_article)
+            article = fetch_article(i)
+            save_article(article)
         except ValueError:
             pass
 
@@ -32,19 +31,26 @@ def get_latest_saved_article_id() -> int:
     return 0
 
 
-def fetch_article(article_id: int) -> str:
-    """글번호에 해당하는 글의 HTML 텍스트를 가져오기. 해당 글이 없으면 ValueError"""
-    html = fetch_html(f'https://www1.president.go.kr/petitions/{article_id}')
-    return html
+def fetch_article(article_id: int) -> Dict[str, any]:
+    """글번호에 해당하는 글의 HTML 텍스트를 가져와서 파싱. 해당 글이 없거나 형식이 다르면 ValueError"""
+    url = f'https://www1.president.go.kr/petitions/{article_id}'
+    html = fetch_html(url)
+    soup = BeautifulSoup(html, "html5lib")
 
-
-def parse_article(html: str) -> Dict[str, any]:
-    """본문 HTML에서 저장할 데이터를 추출하여 반환. 실패하면 ValueError"""
-    raise ValueError('Failed to parse HTML')
+    return {
+        'article_id': article_id,
+        'title': soup.select('.petitionsView_title', limit=1)[0].text,
+        'votes': int(soup.select('.petitionsView_count .counter', limit=1)[0].text),
+        'category': soup.select('.petitionsView_info_list li:nth-of-type(1)', limit=1)[0].text[4:],
+        'start': soup.select('.petitionsView_info_list li:nth-of-type(2)', limit=1)[0].text[4:],
+        'end': soup.select('.petitionsView_info_list li:nth-of-type(3)', limit=1)[0].text[4:],
+        'content': soup.select('.View_write')[0].text,
+    }
 
 
 def save_article(article: Dict[str, any]) -> None:
     """글을 CSV 형태로 저장한다"""
+    print(f'Saving...{article["article_id"]}')
     pass
 
 
