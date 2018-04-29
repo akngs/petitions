@@ -1,4 +1,7 @@
 from typing import Dict
+from urllib import request
+
+from bs4 import BeautifulSoup
 
 
 def main():
@@ -14,7 +17,15 @@ def main():
 
 def get_latest_article_id() -> int:
     """만료된 청원 목록 페이지를 분석하여 가장 최근에 만료된 글번호를 가져오기"""
-    return 1
+    with request.urlopen('https://www1.president.go.kr/petitions?only=finished') as f:
+        if f.getcode() != 200:
+            raise ValueError(f'Invalid status code: {f.getcode()}')
+        html = f.read().decode('utf-8')
+        soup = BeautifulSoup(html, "html5lib")
+        elements = soup.select('.bl_body .bl_wrap .bl_no', limit=1)
+        if len(elements) == 0:
+            raise ValueError(f'Unable to find the latest article\'s id')
+        return int(elements[0].text)
 
 
 def get_latest_saved_article_id() -> int:
