@@ -15,3 +15,23 @@ CSV 데이터의 저작권은 [KOGL 제1유형](http://www.kogl.or.kr/info/licen
 * 변형 등 2차적 저작물 작성 가능
 
 소스 코드는 [MIT License](LICENSE)를 따름.
+
+## 설치 및 실행
+
+소스코드 받기:
+
+    git clone https://github.com/akngs/petitions.git
+    cd petitions
+
+설치 ([pipenv](https://github.com/pypa/pipenv)가 설치되어 있어야 합니다):
+
+    pipenv install
+
+실행:
+
+    pipenv shell
+    python petition.py
+
+생성된 데이터 확인:
+
+    tail data/*.csv
