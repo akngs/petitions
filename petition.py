@@ -104,6 +104,7 @@ def fetch_article(article_id: int) -> Dict[str, any]:
         'article_id': article_id,
         'title': title,
         'votes': votes,
+        'answered': 1 if answered else 0,
         'category': category,
         'start': start,
         'end': end,
@@ -114,7 +115,8 @@ def fetch_article(article_id: int) -> Dict[str, any]:
 def save_article(article: Dict[str, any]) -> None:
     """글을 CSV 형태로 저장한다"""
     cols = [
-        'article_id', 'start', 'end', 'votes', 'category', 'title', 'content'
+        'article_id', 'start', 'end', 'answered', 'votes', 'category', 'title',
+        'content'
     ]
 
     # 파일이 없으면 새로 만들고 칼럼 이름 저장
