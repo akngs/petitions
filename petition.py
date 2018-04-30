@@ -36,7 +36,7 @@ def main():
         f'about {latest_id - next_id} articles to go...'
     )
 
-    with ThreadPoolExecutor(max_workers=4) as exe:
+    with ThreadPoolExecutor(max_workers=2) as exe:
         for article in exe.map(fetch_article, range(next_id, latest_id)):
             if article is None:
                 continue
