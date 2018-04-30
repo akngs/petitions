@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 from typing import Dict
 from urllib import request
 from urllib.error import HTTPError
@@ -31,7 +32,9 @@ def get_latest_article_id() -> int:
     """만료된 청원 목록 페이지를 분석하여 가장 최근에 만료된 글번호를 가져오기"""
     html = fetch_html('https://www1.president.go.kr/petitions?only=finished')
     soup = BeautifulSoup(html, "html5lib")
-    return int(query(soup, '.bl_body .bl_wrap .bl_no'))
+    href = soup.select_one('.bl_body .bl_wrap .bl_subject a')['href']
+    article_id = int(re.match(r'.+/petitions/(\d+).*', href).group(1))
+    return article_id
 
 
 def get_latest_saved_article_id() -> int:
