@@ -1,15 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import csv
+import logging
 import os
 import random
 import re
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 from urllib import request
 from urllib.error import HTTPError
 
 from bs4 import BeautifulSoup
-import logging
 
 DATA_DIR = 'data'
 CSV_FILE_WHOLE = os.path.join(DATA_DIR, 'petition.csv')
@@ -34,13 +35,15 @@ def main():
         f'From {next_id} to {latest_id}: '
         f'about {latest_id - next_id} articles to go...'
     )
-    for i in range(next_id, latest_id):
-        try:
-            article = fetch_article(i)
+
+    with ThreadPoolExecutor(max_workers=4) as exe:
+        for article in exe.map(fetch_article, range(next_id, latest_id)):
+            if article is None:
+                continue
             save_article(article)
-            logging.info(f'{i} of {latest_id}: {article["title"]}')
-        except ValueError:
-            pass
+            logging.info(
+                f'{article["article_id"]} of {latest_id}: {article["title"]}'
+            )
 
     # 전체 CSV 파일에서 일부만 임의추출하여 작은 CSV 파일 만들기
     with open(CSV_FILE_WHOLE, 'r') as whole:
@@ -81,9 +84,14 @@ def get_latest_saved_article_id() -> int:
 
 
 def fetch_article(article_id: int) -> Dict[str, any]:
-    """글번호에 해당하는 글의 HTML 텍스트를 가져와서 파싱. 해당 글이 없으면 ValueError"""
+    """글번호에 해당하는 글의 HTML 텍스트를 가져와서 파싱. 해당 글이 없으면 None"""
     url = f'https://www1.president.go.kr/petitions/{article_id}'
-    html = fetch_html(url)
+
+    try:
+        html = fetch_html(url)
+    except ValueError:
+        return None
+
     soup = BeautifulSoup(html, "html5lib")
 
     title = query(soup, '.petitionsView_title')
