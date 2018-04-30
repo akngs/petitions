@@ -85,11 +85,18 @@ def fetch_article(article_id: int) -> Dict[str, any]:
     soup = BeautifulSoup(html, "html5lib")
 
     title = query(soup, '.petitionsView_title')
-    votes = int(query(soup, '.petitionsView_count .counter'))
+    votes = int(query(soup, '.petitionsView_count .counter').replace(',', ''))
     category = query(soup, '.petitionsView_info_list li:nth-of-type(1)')[4:]
     start = query(soup, '.petitionsView_info_list li:nth-of-type(2)')[4:]
     end = query(soup, '.petitionsView_info_list li:nth-of-type(3)')[4:]
-    content = remove_whitespaces(query(soup, '.View_write')) \
+
+    answered = query(soup, '.petitionsView_progress h4') == '브리핑'
+    if answered:
+        content_selector = '.petitionsView_write > div:nth-of-type(4)'
+    else:
+        content_selector = '.petitionsView_write > div:nth-of-type(2)'
+
+    content = remove_whitespaces(query(soup, content_selector)) \
         .replace('\n', '\\n') \
         .replace('\t', '\\t')
 
