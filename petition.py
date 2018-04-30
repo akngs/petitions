@@ -35,7 +35,7 @@ def main():
     with open(CSV_FILE_WHOLE, 'r') as whole:
         with open(CSV_FILE_SAMPLED, 'w') as sampled:
             random.seed(0)
-            sampled.write(whole.readline() + '\n')
+            sampled.write(whole.readline())
             sampled.writelines(
                 l for l in whole if random.random() <= SAMPLE_RATE
             )
