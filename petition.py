@@ -9,12 +9,19 @@ from urllib.error import HTTPError
 from bs4 import BeautifulSoup
 import logging
 
-CSV_FILE_WHOLE = 'petition.csv'
-CSV_FILE_SAMPLED = 'petition_sampled.csv'
+DATA_DIR = 'data'
+CSV_FILE_WHOLE = os.path.join(DATA_DIR, 'petition.csv')
+CSV_FILE_SAMPLED = os.path.join(DATA_DIR, 'petition_sampled.csv')
 SAMPLE_RATE = 0.05
 
 
 def main():
+    # 데이터 저장 디렉터리 생성
+    try:
+        os.mkdir(DATA_DIR)
+    except FileExistsError:
+        pass
+
     # 새로 만료된 청원을 수집하여 CSV 파일에 덧붙이기
     latest_id = get_latest_article_id()
     next_id = get_latest_saved_article_id() + 1
