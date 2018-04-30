@@ -16,6 +16,8 @@ CSV_FILE_WHOLE = os.path.join(DATA_DIR, 'petition.csv')
 CSV_FILE_SAMPLED = os.path.join(DATA_DIR, 'petition_sampled.csv')
 SAMPLE_RATE = 0.05
 
+logging.basicConfig(level=logging.INFO)
+
 
 def main():
     # 데이터 저장 디렉터리 생성
@@ -36,7 +38,7 @@ def main():
         try:
             article = fetch_article(i)
             save_article(article)
-            logging.info(f'- {i} / {latest_id}: {article["title"]}')
+            logging.info(f'{i} of {latest_id}: {article["title"]}')
         except ValueError:
             pass
 
