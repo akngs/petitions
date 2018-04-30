@@ -1,0 +1,11 @@
+# Project specifics
+petition.csv
+
+# Python
+*.py[co]
+
+# IDEs
+.idea/
+
+# OS
+.DS_Store
