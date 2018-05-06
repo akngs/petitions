@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup
 
 DATA_DIR = 'data'
 CSV_FILE_WHOLE = os.path.join(DATA_DIR, 'petition.csv')
+CSV_FILE_CORRUPTED = os.path.join(DATA_DIR, 'petition_corrupted.csv')
 CSV_FILE_SAMPLED = os.path.join(DATA_DIR, 'petition_sampled.csv')
 SAMPLE_RATE = 0.05
 
@@ -45,10 +46,33 @@ def main():
                 f'{article["article_id"]} of {latest_id}: {article["title"]}'
             )
 
-    # 전체 CSV 파일에서 일부만 임의추출하여 작은 CSV 파일 만들기
+    random.seed(0)
+    generate_corrupted_data()
+    generate_sampled_data()
+
+
+def generate_corrupted_data():
+    """일부 필드값을 고의로 삭제한 CSV 파일 만들기"""
+    candidates = ['category', 'votes', 'start', 'end']
+    with open(CSV_FILE_WHOLE, 'r') as whole:
+        with open(CSV_FILE_CORRUPTED, 'w') as corrupted:
+            csvr = csv.DictReader(whole)
+            csvw = csv.DictWriter(corrupted, csvr.fieldnames)
+            for row in csvr:
+                # 각 행마다 5% 확률로 특정 필드에 결측치 넣기
+                if random.random() <= 0.05:
+                    key = random.choice(candidates)
+                    row[key] = ''
+                # 범주가 '육아/교육'인 경우 5% 확률로 투표수 필드에 결측치 넣기
+                if row['category'] == '육아/교육' and random.random() <= 0.05:
+                    row['votes'] = ''
+                csvw.writerow(row)
+
+
+def generate_sampled_data():
+    """전체 CSV 파일에서 일부만 임의추출하여 작은 CSV 파일 만들기"""
     with open(CSV_FILE_WHOLE, 'r') as whole:
         with open(CSV_FILE_SAMPLED, 'w') as sampled:
-            random.seed(0)
             sampled.write(whole.readline())
             sampled.writelines(
                 l for l in whole if random.random() <= SAMPLE_RATE
