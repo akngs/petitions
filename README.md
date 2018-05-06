@@ -3,8 +3,19 @@
 
 ## 데이터
 
-* 전체 데이터: [petition.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition.csv)
-* 5% 임의추출 데이터: [petition_sampled.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition_sampled.csv)
+[petition.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition.csv)
+
+* 전체 데이터
+
+[petition_corrupted.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition_corrupted.csv)
+
+* 전체 행 중에서 5%는 임의 필드 1개에 결측치 삽입
+* 범주(category)가 "육아/교육"인 경우 5%의 확률로 투표수(votes) 필드에 결측치 삽입
+* 나머지는 전체 데이터와 동일
+
+[petition_sampled.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition_sampled.csv)
+
+* 전체 데이터 중 5%만 임의추출한 데이터
 
 ## 저작권
 
