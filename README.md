@@ -10,7 +10,7 @@
 [petition_corrupted.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition_corrupted.csv)
 
 * 전체 행 중에서 5%는 임의 필드 1개에 결측치 삽입
-* 범주(category)가 "육아/교육"인 경우 5%의 확률로 투표수(votes) 필드에 결측치 삽입
+* 범주(category)가 '육아/교육'이고 투표수(votes)가 50건 초과이면 20% 확률로 투표수에 결측치 넣기
 * 나머지는 전체 데이터와 동일
 
 [petition_sampled.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition_sampled.csv)

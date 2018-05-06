@@ -63,8 +63,10 @@ def generate_corrupted_data():
                 if random.random() <= 0.05:
                     key = random.choice(candidates)
                     row[key] = ''
-                # 범주가 '육아/교육'인 경우 5% 확률로 투표수 필드에 결측치 넣기
-                if row['category'] == '육아/교육' and random.random() <= 0.05:
+                # 범주가 '육아/교육'이고 투표수가 50건 초과이면 20% 확률로 투표수에 결측치 넣기
+                category = row['category'] == '육아/교육'
+                votes = int(row['votes']) > 50
+                if category and votes and random.random() <= 0.2:
                     row['votes'] = ''
                 csvw.writerow(row)
 
