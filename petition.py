@@ -59,16 +59,16 @@ def generate_corrupted_data():
             csvr = csv.DictReader(whole)
             csvw = csv.DictWriter(corrupted, csvr.fieldnames)
             for row in csvr:
-                # 각 행마다 5% 확률로 특정 필드에 결측치 넣기
-                if random.random() <= 0.05:
-                    key = random.choice(candidates)
-                    row[key] = ''
                 # 범주가 '육아/교육'이고 투표수가 50건 초과이면 20% 확률로 투표수에 결측치 넣기
                 category = row['category'] == '육아/교육'
                 votes = int(row['votes']) > 50
                 if category and votes and random.random() <= 0.2:
                     row['votes'] = ''
                 csvw.writerow(row)
+                # 각 행마다 5% 확률로 특정 필드에 결측치 넣기
+                if random.random() <= 0.05:
+                    key = random.choice(candidates)
+                    row[key] = ''
 
 
 def generate_sampled_data():
