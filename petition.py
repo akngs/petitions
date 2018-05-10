@@ -48,6 +48,8 @@ def main():
 
     random.seed(0)
     generate_corrupted_data()
+
+    random.seed(0)
     generate_sampled_data()
 
 
