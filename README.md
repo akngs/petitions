@@ -17,6 +17,11 @@
 
 * 전체 데이터 중 5%만 임의추출한 데이터
 
+[petition_corrupted_sampled.csv](https://s3.ap-northeast-2.amazonaws.com/data10902/petition/petition_corrupted_sampled.csv)
+
+* 결측치가 삽입된 샘플 데이터
+* ``petition_corrupted.csv`` 파일에서 5%만 임의추출하여 생성
+
 ## 저작권
 
 CSV 데이터의 저작권은 [KOGL 제1유형](http://www.kogl.or.kr/info/license.do)을 따름.
