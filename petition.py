@@ -13,10 +13,12 @@ from urllib.error import HTTPError
 from bs4 import BeautifulSoup
 
 DATA_DIR = 'data'
-CSV_FILE_WHOLE = os.path.join(DATA_DIR, 'petition.csv')
-CSV_FILE_CORRUPTED = os.path.join(DATA_DIR, 'petition_corrupted.csv')
-CSV_FILE_SAMPLED = os.path.join(DATA_DIR, 'petition_sampled.csv')
+CSV_WHOLE = os.path.join(DATA_DIR, 'petition.csv')
+CSV_CORRUPT = os.path.join(DATA_DIR, 'petition_corrupted.csv')
+CSV_SAMPLE = os.path.join(DATA_DIR, 'petition_sampled.csv')
+CSV_CORRUPT_SAMPLE = os.path.join(DATA_DIR, 'petition_corrupted_sampled.csv')
 SAMPLE_RATE = 0.05
+FIELDS_TO_CORRUPT = ['category', 'votes', 'start', 'end']
 
 logging.basicConfig(level=logging.INFO)
 
@@ -47,40 +49,37 @@ def main():
             )
 
     random.seed(0)
-    generate_corrupted_data()
-
+    generate_modified_file(CSV_WHOLE, CSV_CORRUPT, False, True)
     random.seed(0)
-    generate_sampled_data()
+    generate_modified_file(CSV_WHOLE, CSV_SAMPLE, True, False)
+    random.seed(0)
+    generate_modified_file(CSV_WHOLE, CSV_CORRUPT_SAMPLE, True, True)
 
 
-def generate_corrupted_data():
-    """일부 필드값을 고의로 삭제한 CSV 파일 만들기"""
-    candidates = ['category', 'votes', 'start', 'end']
-    with open(CSV_FILE_WHOLE, 'r') as whole:
-        with open(CSV_FILE_CORRUPTED, 'w') as corrupted:
-            csvr = csv.DictReader(whole)
-            csvw = csv.DictWriter(corrupted, csvr.fieldnames)
-            for row in csvr:
-                # 범주가 '육아/교육'이고 투표수가 50건 초과이면 20% 확률로 투표수에 결측치 넣기
-                category = row['category'] == '육아/교육'
-                votes = int(row['votes']) > 50
-                if category and votes and random.random() <= 0.2:
-                    row['votes'] = ''
-                csvw.writerow(row)
-                # 각 행마다 5% 확률로 특정 필드에 결측치 넣기
-                if random.random() <= 0.05:
-                    key = random.choice(candidates)
-                    row[key] = ''
+def generate_modified_file(src, dst, sample, corrupt):
+    with open(src, 'r') as fr:
+        with open(dst, 'w') as fw:
+            csvr = csv.DictReader(fr)
+            csvw = csv.DictWriter(fw, csvr.fieldnames)
+            rows = csvr
+            if sample:
+                rows = (row for row in rows if random.random() <= SAMPLE_RATE)
+            if corrupt:
+                rows = (corrupt_row(row) for row in rows)
+            csvw.writerows(rows)
 
 
-def generate_sampled_data():
-    """전체 CSV 파일에서 일부만 임의추출하여 작은 CSV 파일 만들기"""
-    with open(CSV_FILE_WHOLE, 'r') as whole:
-        with open(CSV_FILE_SAMPLED, 'w') as sampled:
-            sampled.write(whole.readline())
-            sampled.writelines(
-                l for l in whole if random.random() <= SAMPLE_RATE
-            )
+def corrupt_row(row):
+    # 범주가 '육아/교육'이고 투표수가 50건 초과이면 20% 확률로 투표수에 결측치 넣기
+    category = row['category'] == '육아/교육'
+    votes = int(row['votes']) > 50
+    if category and votes and random.random() <= 0.2:
+        row['votes'] = ''
+    # 각 행마다 5% 확률로 특정 필드에 결측치 넣기
+    if random.random() <= 0.05:
+        key = random.choice(FIELDS_TO_CORRUPT)
+        row[key] = ''
+    return row
 
 
 def get_latest_article_id() -> int:
@@ -95,11 +94,11 @@ def get_latest_article_id() -> int:
 def get_latest_saved_article_id() -> int:
     """이미 저장한 가장 최근 글번호를 가져오기. 저장된 글이 없으면 0을 반환"""
     # 글이 없으면 0
-    if not os.path.isfile(CSV_FILE_WHOLE):
+    if not os.path.isfile(CSV_WHOLE):
         return 0
 
     # 파일 끝 부분에서 몇 줄 읽어온 뒤 마지막 줄의 첫 칼럼(article_id) 반환
-    with open(CSV_FILE_WHOLE, 'rb') as f:
+    with open(CSV_WHOLE, 'rb') as f:
         # 마지막 줄을 빠르게 찾기 위해 "거의" 끝 부분으로 이동
         f.seek(0, os.SEEK_END)
         f.seek(-min([f.tell(), 1024 * 100]), os.SEEK_CUR)
@@ -158,13 +157,13 @@ def save_article(article: Dict[str, any]) -> None:
     ]
 
     # 파일이 없으면 새로 만들고 칼럼 이름 저장
-    if not os.path.isfile(CSV_FILE_WHOLE):
-        with open(CSV_FILE_WHOLE, 'w', newline='') as f:
+    if not os.path.isfile(CSV_WHOLE):
+        with open(CSV_WHOLE, 'w', newline='') as f:
             w = csv.writer(f)
             w.writerow(cols)
 
     # 새로운 행 추가
-    with open(CSV_FILE_WHOLE, 'a', newline='') as f:
+    with open(CSV_WHOLE, 'a', newline='') as f:
         w = csv.writer(f)
         w.writerow(article[col] for col in cols)
 
