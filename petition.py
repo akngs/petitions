@@ -48,15 +48,13 @@ def main():
                 f'{article["article_id"]} of {latest_id}: {article["title"]}'
             )
 
-    random.seed(0)
     generate_modified_file(CSV_WHOLE, CSV_CORRUPT, False, True)
-    random.seed(0)
     generate_modified_file(CSV_WHOLE, CSV_SAMPLE, True, False)
-    random.seed(0)
     generate_modified_file(CSV_WHOLE, CSV_CORRUPT_SAMPLE, True, True)
 
 
 def generate_modified_file(src, dst, sample, corrupt):
+    random.seed(0)
     with open(src, 'r') as fr:
         with open(dst, 'w') as fw:
             csvr = csv.DictReader(fr)
