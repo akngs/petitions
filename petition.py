@@ -59,6 +59,9 @@ def generate_modified_file(src, dst, sample, corrupt):
         with open(dst, 'w') as fw:
             csvr = csv.DictReader(fr)
             csvw = csv.DictWriter(fw, csvr.fieldnames)
+
+            csvw.writeheader()
+
             rows = csvr
             if sample:
                 rows = (row for row in rows if random.random() <= SAMPLE_RATE)
