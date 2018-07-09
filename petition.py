@@ -5,6 +5,7 @@ import logging
 import os
 import random
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 from urllib import request
@@ -24,6 +25,20 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
+    while True:
+        try:
+            run()
+            break
+        except:
+            print('Retrying after 5 seconds...')
+            time.sleep(5)
+
+    generate_modified_file(CSV_WHOLE, CSV_CORRUPT, False, True)
+    generate_modified_file(CSV_WHOLE, CSV_SAMPLE, True, False)
+    generate_modified_file(CSV_WHOLE, CSV_CORRUPT_SAMPLE, True, True)
+
+
+def run():
     # 데이터 저장 디렉터리 생성
     try:
         os.mkdir(DATA_DIR)
@@ -45,12 +60,8 @@ def main():
                 continue
             save_article(article)
             logging.info(
-                f'{article["article_id"]} of {latest_id}: {article["title"]}'
+                f'{article["article_id"]} of {latest_id}: {article["title"]} https://www1.president.go.kr/petitions/{article["article_id"]}'
             )
-
-    generate_modified_file(CSV_WHOLE, CSV_CORRUPT, False, True)
-    generate_modified_file(CSV_WHOLE, CSV_SAMPLE, True, False)
-    generate_modified_file(CSV_WHOLE, CSV_CORRUPT_SAMPLE, True, True)
 
 
 def generate_modified_file(src, dst, sample, corrupt):
