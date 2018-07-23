@@ -30,11 +30,16 @@ def main():
             run()
             break
         except:
+            # 너무 많은 내용을 한 번에 가져가려고 하면 간혹 일시적으로 차단됨.
+            # 5초 쉬었다가 다시 시도.
             print('Retrying after 5 seconds...')
             time.sleep(5)
 
+    # 결측치 넣은 파일 생성
     generate_modified_file(CSV_WHOLE, CSV_CORRUPT, False, True)
+    # 샘플링한 파일 생성
     generate_modified_file(CSV_WHOLE, CSV_SAMPLE, True, False)
+    # 결측치 넣고 샘플링한 파일 생성
     generate_modified_file(CSV_WHOLE, CSV_CORRUPT_SAMPLE, True, True)
 
 
@@ -45,7 +50,7 @@ def run():
     except FileExistsError:
         pass
 
-    # 새로 만료된 청원을 수집하여 CSV 파일에 덧붙이기
+    # 추가로 만료된 청원을 수집하여 기존 CSV 파일에 덧붙이기
     latest_id = get_latest_article_id()
     next_id = get_latest_saved_article_id() + 1
 
@@ -54,6 +59,7 @@ def run():
         f'about {latest_id - next_id} articles to go...'
     )
 
+    # 동시에 두 개씩 병렬로 처리. workers를 더 늘리면 더 자주 차단됨.
     with ThreadPoolExecutor(max_workers=2) as exe:
         for article in exe.map(fetch_article, range(next_id, latest_id)):
             if article is None:
@@ -67,6 +73,9 @@ def run():
 
 
 def generate_modified_file(src, dst, sample, corrupt):
+    """원본 파일을 샘플링하고 결측치 넣은 새 파일 생성"""
+
+    # 랜덤 시드 고정. 매번 동일한 결과가 보장되도록.
     random.seed(0)
     with open(src, 'r') as fr:
         with open(dst, 'w') as fw:
@@ -76,10 +85,14 @@ def generate_modified_file(src, dst, sample, corrupt):
             csvw.writeheader()
 
             rows = csvr
+
+            # 샘플링
             if sample:
                 rows = (row for row in rows if random.random() <= SAMPLE_RATE)
+            # 결측치 추가
             if corrupt:
                 rows = (corrupt_row(row) for row in rows)
+
             csvw.writerows(rows)
 
 
