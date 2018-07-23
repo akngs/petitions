@@ -124,7 +124,7 @@ def get_latest_saved_article_id() -> int:
         return article_id
 
 
-def fetch_article(article_id: int) -> Dict[str, any]:
+def fetch_article(article_id: int) -> Dict[str, any] or None:
     """글번호에 해당하는 글의 HTML 텍스트를 가져와서 파싱. 해당 글이 없으면 None"""
     url = f'https://www1.president.go.kr/petitions/{article_id}'
 
