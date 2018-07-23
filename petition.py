@@ -60,7 +60,9 @@ def run():
                 continue
             save_article(article)
             logging.info(
-                f'{article["article_id"]} of {latest_id}: {article["title"]} https://www1.president.go.kr/petitions/{article["article_id"]}'
+                f'{article["article_id"]} of {latest_id}: {article["title"]} '
+                f'https://www1.president.go.kr/petitions/'
+                f'{article["article_id"]}'
             )
 
 
