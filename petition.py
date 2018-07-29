@@ -185,12 +185,12 @@ def save_article(article: Dict[str, any]) -> None:
 
     # 파일이 없으면 새로 만들고 칼럼 이름 저장
     if not os.path.isfile(CSV_WHOLE):
-        with open(CSV_WHOLE, 'w', newline='') as f:
+        with open(CSV_WHOLE, 'w', newline='', encoding='utf-8') as f:
             w = csv.writer(f)
             w.writerow(cols)
 
     # 새로운 행 추가
-    with open(CSV_WHOLE, 'a', newline='') as f:
+    with open(CSV_WHOLE, 'a', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
         w.writerow(article[col] for col in cols)
 
