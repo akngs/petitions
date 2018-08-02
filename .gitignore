@@ -2,6 +2,7 @@
 data/
 
 # Python
+.venv/
 *.py[co]
 
 # IDEs
